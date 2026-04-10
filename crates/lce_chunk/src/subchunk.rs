@@ -1,5 +1,5 @@
 use bevy::{asset::RenderAssetUsages, prelude::*};
-use lce_palette::container::PVec;
+use lce_palette::collection::PVec;
 
 /// A 16x by 16z by 16y section within a [`Chunk`](crate::chunk::Chunk).
 ///
@@ -34,7 +34,7 @@ impl SubChunk {
     ///
     /// ```rust
     /// use lce_chunk::SubChunk;
-    /// use lce_palette::container::PVec;
+    /// use lce_palette::collection::PVec;
     ///
     /// let origin = (0, 0, 0);
     /// let origin_idx = SubChunk::index(origin.0, origin.1, origin.2);
@@ -70,7 +70,7 @@ impl SubChunk {
     ///
     /// ```rust
     /// use lce_chunk::SubChunk;
-    /// use lce_palette::container::PVec;
+    /// use lce_palette::collection::PVec;
     ///
     /// # fn main() {
     /// #     doc().expect("there should be at least one value");

@@ -5,6 +5,6 @@
 #![feature(generic_const_exprs)]
 #![feature(impl_trait_in_bindings)]
 
-pub mod container;
+pub mod collection;
 pub mod index;
 pub mod palette;
