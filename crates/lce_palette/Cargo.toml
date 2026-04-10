@@ -1,0 +1,10 @@
+[package]
+name = "lce_palette"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+hashbrown = "0.16.1"
+
+[lints]
+workspace = true

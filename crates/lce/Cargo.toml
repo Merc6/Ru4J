@@ -1,0 +1,22 @@
+[package]
+name = "lce"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+bevy.workspace      = true
+bevy-inspector-egui = { version = "0.36.0", optional = true }
+lce_chunk           = { path = "../lce_chunk" }
+
+[features]
+default = []
+dev     = [
+    "bevy/dev",
+    "bevy/dynamic_linking",
+    "bevy/free_camera",
+    "dep:bevy-inspector-egui",
+    "lce_chunk/dev",
+]
+
+[lints]
+workspace = true

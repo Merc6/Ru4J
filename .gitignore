@@ -1,0 +1,10 @@
+/*
+
+!/crates
+
+!/.git*
+!/flake.*
+!/Cargo.*
+
+!/CONTRIBUTING.md
+!/README.md

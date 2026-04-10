@@ -1,0 +1,18 @@
+[package]
+name = "lce_chunk"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+bevy.workspace   = true
+lce_palette.path = "../lce_palette"
+
+[features]
+default = []
+dev     = [
+    "bevy/dev",
+    "bevy/dynamic_linking",
+]
+
+[lints]
+workspace = true
