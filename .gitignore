@@ -5,6 +5,7 @@
 !/.git*
 !/flake.*
 !/Cargo.*
+!/LICENSE-*
 
 !/CONTRIBUTING.md
 !/README.md
