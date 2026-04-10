@@ -72,8 +72,6 @@ impl SubChunk {
     /// use lce_chunk::SubChunk;
     /// use lce_palette::container::PVec;
     ///
-    /// # use std::error::Error;
-    /// #
     /// # fn main() {
     /// #     doc().expect("there should be at least one value");
     /// # }
