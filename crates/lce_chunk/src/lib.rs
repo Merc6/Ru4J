@@ -1,7 +1,5 @@
 //! A strategy to divide the world into manageable segments.
 
-#![feature(stmt_expr_attributes)]
-
 use bevy::prelude::*;
 
 mod chunk;
@@ -10,6 +8,9 @@ mod subchunk;
 pub use chunk::Chunk;
 pub use subchunk::SubChunk;
 
+/// The [`Plugin`] that implements chunking behavior.
+///
+/// For more details on chunking see [`Chunk`].
 #[derive(Clone, Copy, Debug, Eq, Default, Hash, PartialEq)]
 pub struct LceChunkPlugin;
 
