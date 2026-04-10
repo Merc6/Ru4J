@@ -228,3 +228,73 @@ impl SubChunk {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use bevy::{mesh::MeshPlugin, prelude::*};
+
+    use super::*;
+
+    #[test]
+    fn coordinate_conversion_index_first() {
+        for y in 0..SubChunk::SIZE {
+            for x in 0..SubChunk::SIZE {
+                for z in 0..SubChunk::SIZE {
+                    let (x, y, z) = (
+                        u8::try_from(x).expect("the chunk-relative `x` should cast into a `u8`"),
+                        u8::try_from(y).expect("the chunk-relative `y` should cast into a `u8`"),
+                        u8::try_from(z).expect("the chunk-relative `z` should cast into a `u8`"),
+                    );
+
+                    let idx = SubChunk::index(x, y, z);
+                    assert_eq!(SubChunk::coords(idx), (x, y, z));
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn coordinate_conversion_coords_first() {
+        for idx in 0..SubChunk::SIZE_3 {
+            let (x, y, z) = SubChunk::coords(idx);
+            assert_eq!(SubChunk::index(x, y, z), idx);
+        }
+    }
+
+    #[test]
+    fn mesh_generation() {
+        let mut app = App::new();
+
+        app.add_plugins((
+            AssetPlugin::default(),
+            MeshPlugin,
+            MaterialPlugin::<StandardMaterial>::default(),
+        ))
+        .add_systems(PreUpdate, SubChunk::generate_mesh)
+        .add_systems(
+            PostUpdate,
+            |sub_chunk_mesh: Single<&Mesh3d, With<SubChunk>>, meshes: Res<Assets<Mesh>>| {
+                let mesh = meshes
+                    .get(sub_chunk_mesh.id())
+                    .expect("mesh should exist for the subchunk");
+
+                let indices = mesh.indices().expect("mesh should have indices");
+
+                // 7 quads because of how our culling works.
+                //
+                // This first starts out as 3 cubes in a row, which is 18 quads
+                // total. All the quads on chunk boarders are culled, leaving
+                // 11 quads. Quads that cannot be seen are then culled, leaving
+                // 7 quads.
+                assert_eq!(indices.len() / 6, 7, "there should be seven quads");
+            },
+        )
+        .add_systems(Startup, |mut commands: Commands| {
+            commands.spawn(SubChunk {
+                storage: PVec::filled(1, 3),
+            });
+        });
+
+        app.update();
+    }
+}
