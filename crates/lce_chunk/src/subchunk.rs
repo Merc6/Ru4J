@@ -155,9 +155,9 @@ impl SubChunk {
                     if subchunk
                         .storage
                         .get(Self::index(
-                            nx.try_into().expect("`n` should fit in an `u8`"),
-                            ny.try_into().expect("`n` should fit in an `u8`"),
-                            nz.try_into().expect("`n` should fit in an `u8`"),
+                            nx.try_into().expect("`nx` should fit in an `u8`"),
+                            ny.try_into().expect("`ny` should fit in an `u8`"),
+                            nz.try_into().expect("`nz` should fit in an `u8`"),
                         ))
                         .unwrap_or(&0)
                         != &0
