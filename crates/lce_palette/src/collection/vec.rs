@@ -5,6 +5,8 @@ use crate::{
     palette::{Entry, Palette, hybrid::HybridPalette},
 };
 
+/// A data-structure similar to a [`Vec`], but utilizes palette compression in
+/// how it stores items.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct PVec<T, P = HybridPalette<T>, B = AlignedIndexBuffer>
 where
@@ -23,10 +25,14 @@ where
     P: Palette<T>,
     B: IndexBuffer,
 {
+    /// Constructs a new [`PVec`].
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Constructs a new [`PVec`], containing `value` repeated `len` times.
+    #[must_use]
     pub fn filled(value: T, len: usize) -> Self {
         let mut palette = P::default();
 
@@ -48,20 +54,27 @@ where
         }
     }
 
+    /// Returns the number of items stored in this [`PVec`].
+    #[must_use]
     pub fn len(&self) -> usize {
-        self.buffer.indices()
+        self.buffer.len()
     }
 
+    /// Returns `true` if the [`PVec`] contains no items.
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.buffer.is_empty()
     }
 
+    /// Returns the [`PVec's`](PVec) unique entries.
+    #[must_use]
     pub fn unique_values(&self) -> usize {
         self.palette.entries()
     }
 
+    /// Appends an item to the end of the [`PVec`].
     pub fn push(&mut self, value: T) {
-        match self.palette.entry_for_mut(&value) {
+        match self.palette.find_mut(&value) {
             None => {
                 let (idx, new_idx_size) = self.palette.insert_new(Entry { value, count: 1 });
 
@@ -78,6 +91,8 @@ where
         }
     }
 
+    /// Removes and returns the item at the end of the [`PVec`], unless the
+    /// `PVec` is empty, then this returns [`None`].
     pub fn pop(&mut self) -> Option<T> {
         let idx = self.buffer.pop()?;
         let entry = self.palette.get_mut(idx)?;
@@ -86,36 +101,35 @@ where
         entry.count -= 1;
 
         if entry.count == 0 {
-            self.palette.mark_unused(idx);
+            self.palette.free(idx);
         }
 
         Some(value)
     }
 
+    /// Returns a reference to the value at `offset`, otherwise returns [`None`]
+    #[must_use]
     pub fn get(&self, offset: usize) -> Option<&T> {
-        (offset < self.buffer.indices()).then(|| &self.palette[self.buffer.get(offset)].value)
+        self.buffer.get(offset).map(|idx| &self.palette[idx].value)
     }
 
+    /// Returns `true` if `offset` is valid within [`PVec`].
+    #[must_use]
     pub fn contains(&self, offset: usize) -> bool {
-        self.get(offset).is_some()
+        self.buffer.get(offset).is_some()
     }
 
+    /// Optimizes the stored values, could potentially decrease memory
+    /// allocated.
     pub fn optimize(&mut self) {
         let mapping = self.palette.optimize();
-        let new_index_size = self.palette.index_size();
+        let new_index_size = self.palette.index_width();
         self.buffer.set_index_size(new_index_size as usize, mapping);
     }
 
+    /// Returns an [`Iterator`] over the values stored in the [`PVec`].
     pub fn iter(&self) -> Iter<'_, T, P, B> {
         self.into_iter()
-    }
-
-    pub fn index_iter(&self) -> IndexIter<'_, T, P, B> {
-        IndexIter {
-            palette: &self.palette,
-            buffer: self.buffer.offset_iter(),
-            _phantom: PhantomData,
-        }
     }
 }
 
@@ -151,6 +165,7 @@ where
     }
 }
 
+#[must_use]
 pub struct Iter<'a, T, P, B>
 where
     T: Eq + Hash + Clone + 'a,
@@ -192,31 +207,5 @@ where
             buffer: self.buffer.iter(),
             _phantom: PhantomData,
         }
-    }
-}
-
-pub struct IndexIter<'a, T, P, B>
-where
-    T: Eq + Hash + Clone + 'a,
-    P: Palette<T>,
-    B: IndexBuffer,
-{
-    palette: &'a P,
-    buffer: index::OffsetIter<'a, B>,
-    _phantom: PhantomData<fn() -> &'a T>,
-}
-
-impl<'a, T, P, B> Iterator for IndexIter<'a, T, P, B>
-where
-    T: Eq + Hash + Clone,
-    P: Palette<T>,
-    B: IndexBuffer,
-{
-    type Item = (usize, &'a T);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let (offset, idx) = self.buffer.next()?;
-        let entry = &self.palette[idx];
-        Some((offset, &entry.value))
     }
 }

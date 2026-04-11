@@ -2,6 +2,11 @@ use std::cmp::Ordering;
 
 use crate::index::IndexBuffer;
 
+/// An [`IndexBuffer`] that sacrifices slightly higher memory usage for slightly
+/// faster access speeds.
+///
+/// It achieves that by tightly packing its indices into a [`Vec<u64>`],
+/// ignoring boundary-crossing indices.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct AlignedIndexBuffer {
     index_size: usize,
@@ -12,6 +17,8 @@ pub struct AlignedIndexBuffer {
 }
 
 impl AlignedIndexBuffer {
+    /// Constructs a new [`AlignedIndexBuffer`].
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
@@ -62,12 +69,8 @@ impl IndexBuffer for AlignedIndexBuffer {
             .expect("Indices should fit within a u8");
     }
 
-    fn indices(&self) -> usize {
+    fn len(&self) -> usize {
         self.len
-    }
-
-    fn is_empty(&self) -> bool {
-        self.len == 0
     }
 
     fn set_index_size(
@@ -88,7 +91,7 @@ impl IndexBuffer for AlignedIndexBuffer {
                             idx,
                             new_size,
                             new_indices_per_u64,
-                            self.get(idx),
+                            unsafe { self.get_unchecked(idx) },
                         );
                     }),
                     Some(ref mapping) => (0..self.len).rev().for_each(|idx| {
@@ -97,7 +100,7 @@ impl IndexBuffer for AlignedIndexBuffer {
                             new_size,
                             new_indices_per_u64,
                             *mapping
-                                .get(&self.get(idx))
+                                .get(&unsafe { self.get_unchecked(idx) })
                                 .expect("mapping should contain old index"),
                         );
                     }),
@@ -129,7 +132,7 @@ impl IndexBuffer for AlignedIndexBuffer {
                             idx,
                             new_size,
                             new_indices_per_u64,
-                            self.get(idx),
+                            unsafe { self.get_unchecked(idx) },
                         );
                     }),
                     Some(ref mapping) => (0..self.len).for_each(|idx| {
@@ -138,7 +141,7 @@ impl IndexBuffer for AlignedIndexBuffer {
                             new_size,
                             new_indices_per_u64,
                             *mapping
-                                .get(&self.get(idx))
+                                .get(&unsafe { self.get_unchecked(idx) })
                                 .expect("mapping should contain old index"),
                         );
                     }),
@@ -157,7 +160,7 @@ impl IndexBuffer for AlignedIndexBuffer {
                     self.set(
                         idx,
                         *mapping
-                            .get(&self.get(idx))
+                            .get(&unsafe { self.get_unchecked(idx) })
                             .expect("mapping should contain old index"),
                     );
                 });
@@ -195,7 +198,7 @@ impl IndexBuffer for AlignedIndexBuffer {
         }
 
         let indices_per_u64: usize = self.indices_per_u64.into();
-        let index = self.get(self.len - 1);
+        let index = unsafe { self.get_unchecked(self.len - 1) };
 
         self.len -= 1;
 
@@ -223,19 +226,32 @@ impl IndexBuffer for AlignedIndexBuffer {
             .expect("`old_index` should fit in a `usize`")
     }
 
-    fn get(&self, offset: usize) -> usize {
-        debug_assert!(offset < self.len);
+    fn get(&self, offset: usize) -> Option<usize> {
+        if offset >= self.len {
+            return None;
+        }
 
+        if self.index_size == 0 {
+            return Some(0);
+        }
+
+        unsafe { Some(self.get_unchecked(offset)) }
+    }
+
+    unsafe fn get_unchecked(&self, offset: usize) -> usize {
         if self.index_size == 0 {
             return 0;
         }
 
         let indices_per_u64 = self.indices_per_u64 as usize;
+
+        // SAFETY: caller promises that [`offset`] is a valid index.
         let target_u64 = unsafe { self.storage.get_unchecked(offset / indices_per_u64) };
+
         let target_offset = (offset % indices_per_u64) * self.index_size;
 
         ((*target_u64 >> target_offset) & self.mask)
             .try_into()
-            .expect("return value should fit in a `usize`")
+            .expect("return value should fit in a usize")
     }
 }
