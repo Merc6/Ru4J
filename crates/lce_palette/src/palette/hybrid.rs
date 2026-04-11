@@ -1,4 +1,5 @@
-use core::slice;
+//! See [`HybridPalette`].
+
 use std::{
     hash::Hash,
     ops::{Index, IndexMut},
@@ -8,6 +9,8 @@ use hashbrown::{HashMap, hash_map};
 
 use crate::palette::{Entry, Palette};
 
+/// A [`Palette`] that stores [`HEAP_THRESHOLD`] [`Entries`](Entry) on the
+/// stack, moving them to the heap if that threshold is exceeded.
 #[derive(Clone, Debug)]
 pub struct HybridPalette<T, const HEAP_THRESHOLD: usize = { calc_heap_threshold::<T>() }>
 where
@@ -22,12 +25,21 @@ impl<const HEAP_THRESHOLD: usize, T> HybridPalette<T, HEAP_THRESHOLD>
 where
     T: Eq + Hash + Clone,
 {
+    /// Constructs a new [`HybridPalette`].
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Returns the `HEAP_THRESHOLD` of this [`HybridPalette`].
+    #[must_use]
     pub const fn heap_threshold() -> usize {
-        return HEAP_THRESHOLD;
+        HEAP_THRESHOLD
+    }
+
+    /// Returns an Iterator over this [`HybridPalettes`](HybridPalette) entries.
+    pub fn iter(&self) -> Iter<'_, T, impl Iterator<Item = &Entry<T>>> {
+        self.into_iter()
     }
 
     fn convert_to_hashmap(&mut self) {
@@ -96,10 +108,6 @@ where
 
         needs_new_mapping.then_some(new_mapping)
     }
-
-    fn iter(&self) -> Iter<'_, T> {
-        self.into_iter()
-    }
 }
 
 impl<const HEAP_THRESHOLD: usize, T> Palette<T> for HybridPalette<T, HEAP_THRESHOLD>
@@ -110,15 +118,11 @@ where
         self.real_entries
     }
 
-    fn is_empty(&self) -> bool {
-        self.entries() == 0
-    }
-
-    fn index_size(&self) -> u32 {
+    fn index_width(&self) -> u32 {
         self.index_size
     }
 
-    fn mark_unused(&mut self, index: usize) {
+    fn free(&mut self, index: usize) {
         match &mut self.storage {
             HybridStorage::Array(array) => array[index] = None,
             HybridStorage::HashMap {
@@ -151,7 +155,7 @@ where
         }
     }
 
-    fn entry_for(&self, value: &T) -> Option<(&Entry<T>, usize)> {
+    fn find(&self, value: &T) -> Option<(&Entry<T>, usize)> {
         match &self.storage {
             HybridStorage::Array(array) => array.iter().enumerate().find_map(|(idx, entry)| {
                 entry
@@ -169,7 +173,7 @@ where
         }
     }
 
-    fn entry_for_mut(&mut self, value: &T) -> Option<(&mut Entry<T>, usize)> {
+    fn find_mut(&mut self, value: &T) -> Option<(&mut Entry<T>, usize)> {
         match &mut self.storage {
             HybridStorage::Array(array) => array.iter_mut().enumerate().find_map(|(idx, entry)| {
                 entry
@@ -357,7 +361,7 @@ where
 }
 
 impl<'a, const H: usize, T: Eq + Hash + Clone> IntoIterator for &'a HybridPalette<T, H> {
-    type IntoIter = Iter<'a, T>;
+    type IntoIter = Iter<'a, T, impl Iterator<Item = &'a Entry<T>>>;
     type Item = &'a Entry<T>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -368,17 +372,16 @@ impl<'a, const H: usize, T: Eq + Hash + Clone> IntoIterator for &'a HybridPalett
     }
 }
 
-pub enum Iter<'a, T: Eq + Hash + Clone> {
-    Array(
-        core::iter::FilterMap<
-            slice::Iter<'a, Option<Entry<T>>>,
-            fn(&Option<Entry<T>>) -> Option<&Entry<T>>,
-        >,
-    ),
+/// The [`Iterator`] over the entries stored in a [`HybridPalette`].
+pub enum Iter<'a, T: Eq + Hash + Clone, I: Iterator<Item = &'a Entry<T>>> {
+    /// The [`Iterator`] for the stack-allocated [`HybridPalette`].
+    Array(I),
+
+    /// The [`Iterator`] for the heap-allocated [`HybridPalette`].
     HashMap(hash_map::Values<'a, usize, Entry<T>>),
 }
 
-impl<'a, T: Eq + Hash + Clone> Iterator for Iter<'a, T> {
+impl<'a, T: Eq + Hash + Clone, I: Iterator<Item = &'a Entry<T>>> Iterator for Iter<'a, T, I> {
     type Item = &'a Entry<T>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -396,15 +399,26 @@ impl<'a, T: Eq + Hash + Clone> Iterator for Iter<'a, T> {
     }
 }
 
+/// The storage abstraction for heap-allocated vs stack-allocated for use in
+/// [`HybridPalette`].
 #[derive(Clone, Debug)]
 pub enum HybridStorage<const HEAP_THRESHOLD: usize, T>
 where
     T: Eq + Hash + Clone,
 {
+    /// The stack-allocated storage method for
+    /// [`HybridPalettes`](HybridPalette).
     Array([Option<Entry<T>>; HEAP_THRESHOLD]),
+
+    /// The heap-allocated storage method for [`HybridPalettes`](HybridPalette).
     HashMap {
+        /// The list of indices that have been allocated but are no longer used.
         free_indices: Vec<usize>,
+
+        /// The mapping of indices to their entries.
         index_map: HashMap<usize, Entry<T>>,
+
+        /// The mapping of values to their indices.
         value_map: HashMap<T, usize>,
     },
 }
@@ -418,6 +432,8 @@ where
     }
 }
 
+/// Returns an optimal heap-threshold for [`HybridPalettes`](HybridPalette).
+#[must_use]
 pub const fn calc_heap_threshold<T: Eq + Hash + Clone>() -> usize {
     let hm_sizes = 2 * size_of::<HashMap<usize, usize>>();
     let vec_size = size_of::<Vec<usize>>();

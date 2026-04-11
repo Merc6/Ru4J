@@ -80,7 +80,7 @@ impl SubChunk {
     /// let mut storage = PVec::<u8>::new();
     /// storage.push(1);
     ///
-    /// let (index, _) = storage.index_iter().next()?;
+    /// let (index, _) = storage.iter().enumerate().next()?;
     ///
     /// assert_eq!(
     ///     SubChunk::coords(index),
@@ -129,7 +129,12 @@ impl SubChunk {
             let mut normals = Vec::new();
 
             // Stub until blocks exist.
-            for (idx, _block) in subchunk.storage.index_iter().filter(|(_, blk)| **blk != 0) {
+            for (idx, _block) in subchunk
+                .storage
+                .iter()
+                .enumerate()
+                .filter(|(_, blk)| **blk != 0)
+            {
                 let (x, y, z) = Self::coords(idx);
 
                 let (fx, fy, fz) = (f32::from(x), f32::from(y), f32::from(z));
@@ -189,7 +194,7 @@ impl SubChunk {
                         ]}
                     );
 
-                    normals.extend_from_slice(&[[dx, dy, dz]].repeat(4));
+                    normals.extend_from_slice(&[[dx, dy, dz]; 4]);
 
                     indices.extend_from_slice(&[
                         cur_idx,
