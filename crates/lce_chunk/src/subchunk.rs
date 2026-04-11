@@ -136,7 +136,6 @@ impl SubChunk {
                 .filter(|(_, blk)| **blk != 0)
             {
                 let (x, y, z) = Self::coords(idx);
-
                 let (fx, fy, fz) = (f32::from(x), f32::from(y), f32::from(z));
 
                 for [dx, dy, dz] in FACE_OFFSETS {
@@ -144,17 +143,14 @@ impl SubChunk {
                     let ny = i16::from(y) + dy;
                     let nz = i16::from(z) + dz;
 
-                    {
-                        let valid_range = 0..i16::try_from(Self::SIZE).expect(
-                            "The length of a sub-chunks axes should not exceed i16 precision",
-                        );
+                    let valid_range = 0..i16::try_from(Self::SIZE)
+                        .expect("The length of a sub-chunks axes should not exceed i16 precision");
 
-                        if !(valid_range.contains(&nx)
-                            && valid_range.contains(&ny)
-                            && valid_range.contains(&nz))
-                        {
-                            continue;
-                        }
+                    if !(valid_range.contains(&nx)
+                        && valid_range.contains(&ny)
+                        && valid_range.contains(&nz))
+                    {
+                        continue;
                     }
 
                     if subchunk
@@ -195,7 +191,6 @@ impl SubChunk {
                     );
 
                     normals.extend_from_slice(&[[dx, dy, dz]; 4]);
-
                     indices.extend_from_slice(&[
                         cur_idx,
                         cur_idx + 3,
