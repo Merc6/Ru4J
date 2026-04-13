@@ -1,0 +1,29 @@
+[package]
+name = "lce_biome"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+bevy.workspace    = true
+serde             = "1.0"
+toml              = "1.1.2"
+
+[dependencies.hashbrown]
+version  = "0.17"
+features = ["serde"]
+
+[dependencies.leafwing_manifest]
+version  = "0.6"
+features = ["toml"]
+
+[features]
+default = []
+dev     = [
+    "bevy/dev",
+    "bevy/dynamic_linking",
+]
+
+[lints]
+workspace = true

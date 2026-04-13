@@ -12,7 +12,11 @@ use bevy_inspector_egui::{bevy_egui::EguiPlugin, quick::WorldInspectorPlugin};
 fn main() -> AppExit {
     let mut app = App::new();
 
-    app.add_plugins((DefaultPlugins, lce_chunk::LceChunkPlugin));
+    app.add_plugins((
+        DefaultPlugins,
+        lce_chunk::LceChunkPlugin,
+        lce_biome::LceBiomePlugin,
+    ));
 
     #[cfg(feature = "dev")]
     app.add_plugins((
