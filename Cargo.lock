@@ -3426,6 +3426,7 @@ name = "lce_chunk"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "lce_biome",
  "lce_palette",
 ]
 

@@ -1,4 +1,6 @@
 use bevy::prelude::*;
+use lce_biome::BiomeId;
+use lce_palette::collection::PVec;
 
 /// A 16x by 16z portion of the world.
 ///
@@ -11,4 +13,14 @@ use bevy::prelude::*;
 /// [`Entities`](Entity) of the chunk.
 #[derive(Component, Debug, Default)]
 #[require(Children, Transform)]
-pub struct Chunk;
+pub struct Chunk {
+    biomes: PVec<BiomeId>,
+}
+
+impl Chunk {
+    /// Returns the biomes stored in the [`Chunk`].
+    #[must_use]
+    pub const fn biomes(&self) -> &PVec<BiomeId> {
+        &self.biomes
+    }
+}
