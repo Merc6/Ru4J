@@ -21,6 +21,9 @@ use {
     },
 };
 
+/// An Identifier that allows access into the [biome registry](BiomeRegistry).
+pub type BiomeId = leafwing_manifest::identifier::Id<Biome>;
+
 /// Plugin to load the biome registry.
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default, Hash)]
 pub struct LceBiomePlugin;
