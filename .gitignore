@@ -1,4 +1,5 @@
 /*
+/crates/lce/assets/textures
 
 !/crates
 
@@ -9,3 +10,4 @@
 
 !/CONTRIBUTING.md
 !/README.md
+!/rustfmt.toml

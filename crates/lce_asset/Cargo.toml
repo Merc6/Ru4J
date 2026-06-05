@@ -1,0 +1,16 @@
+[package]
+name = "lce_asset"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+bevy.workspace = true
+
+[features]
+default = []
+dev     = [ "bevy/dynamic_linking" ]
+
+[lints]
+workspace = true
