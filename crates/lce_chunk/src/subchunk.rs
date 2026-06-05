@@ -3,6 +3,7 @@ use bevy::{
     math::{I16Vec3, U8Vec3},
     prelude::*,
 };
+use bevy_rapier3d::prelude::*;
 use lce_asset::BlockAtlasData;
 use lce_block::{Block, BlockId, BlockRegistry};
 use lce_palette::collection::PVec;
@@ -134,6 +135,7 @@ impl SubChunk {
             let mut indices = Vec::new();
             let mut normals = Vec::new();
             let mut uvs = Vec::new();
+            let mut coords = Vec::new();
 
             for (idx, &block_id) in subchunk
                 .storage
@@ -142,6 +144,7 @@ impl SubChunk {
                 .filter(|(_, blk)| !BlockRegistry::is_air(**blk))
             {
                 let (x, y, z) = Self::coords(idx);
+                coords.push(U8Vec3::new(x, y, z).as_ivec3());
 
                 let block = block_registry.get(block_id).unwrap();
 
@@ -218,6 +221,8 @@ impl SubChunk {
 
             commands.entity(entity).insert((
                 Mesh3d(meshes.add(mesh)),
+                Collider::voxels(Vec3::ONE, &coords),
+                RigidBody::Fixed,
                 MeshMaterial3d(materials.add(StandardMaterial {
                     base_color_texture: Some(block_sprites.texture.clone()),
                     perceptual_roughness: 1.0,

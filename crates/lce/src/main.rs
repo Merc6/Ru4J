@@ -1,6 +1,7 @@
 //! The entry-point for Rust-port of 4jcraft.
 
 use bevy::{color::palettes::css::BLACK, pbr::DefaultOpaqueRendererMethod, prelude::*};
+use bevy_rapier3d::prelude::*;
 use lce_block::BlockId;
 use lce_palette::collection::PVec;
 use leafwing_manifest::{asset_state::SimpleAssetState, plugin::ManifestPlugin};
@@ -19,6 +20,7 @@ fn main() -> AppExit {
     minecraft.add_plugins((
         DefaultPlugins,
         ManifestPlugin::<SimpleAssetState>::default(),
+        RapierPhysicsPlugin::<NoUserData>::default(),
     ));
 
     minecraft.add_plugins((
@@ -47,6 +49,7 @@ fn main() -> AppExit {
             WorldInspectorPlugin::default(),
             FpsOverlayPlugin::default(),
             FreeCameraPlugin,
+            RapierDebugRenderPlugin::default(),
         ));
 
         minecraft.add_systems(

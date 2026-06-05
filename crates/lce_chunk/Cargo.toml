@@ -8,6 +8,7 @@ authors.workspace = true
 [dependencies]
 bevy.workspace              = true
 leafwing_manifest.workspace = true
+bevy_rapier3d.workspace     = true
 
 lce_palette.path = "../lce_palette"
 lce_biome.path   = "../lce_biome"

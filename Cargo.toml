@@ -24,6 +24,10 @@ version          = "0.18"
 default-features = false
 features         = ["3d"]
 
+[workspace.dependencies.bevy_rapier3d]
+version  = "0.34"
+features = [ "parallel", "simd-stable" ]
+
 [workspace.lints.rust]
 missing_docs = "warn"
 
