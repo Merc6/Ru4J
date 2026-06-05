@@ -6,13 +6,19 @@ license.workspace = true
 authors.workspace = true
 
 [dependencies]
-bevy.workspace      = true
-bevy-inspector-egui = { version = "0.36.0", optional = true }
-lce_chunk           = { path = "../lce_chunk" }
-lce_biome           = { path = "../lce_biome" }
+bevy.workspace              = true
+leafwing_manifest.workspace = true
+
+bevy-inspector-egui         = { version = "0.36.0", optional = true }
+
+lce_chunk.path   = "../lce_chunk"
+lce_biome.path   = "../lce_biome"
+lce_block.path   = "../lce_block"
+lce_palette.path = "../lce_palette"
+lce_asset.path   = "../lce_asset"
 
 [features]
-default = []
+default = ["dev"]
 dev     = [
     "bevy/dev",
     "bevy/dynamic_linking",
@@ -20,6 +26,7 @@ dev     = [
     "dep:bevy-inspector-egui",
     "lce_chunk/dev",
     "lce_biome/dev",
+    "lce_block/dev",
 ]
 
 [lints]

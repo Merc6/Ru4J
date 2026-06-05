@@ -62,7 +62,6 @@ impl IndexBuffer for AlignedIndexBuffer {
         self.mask = (1 << self.index_size) - 1;
 
         self.storage.resize(needed_u64, 0);
-        self.storage.clear();
 
         self.indices_per_u64 = indices_per_u64
             .try_into()
@@ -106,6 +105,7 @@ impl IndexBuffer for AlignedIndexBuffer {
                     }),
                 }
 
+                self.index_size = new_size;
                 self.mask = (1 << new_size) - 1;
                 self.indices_per_u64 = new_indices_per_u64
                     .try_into()
@@ -149,6 +149,7 @@ impl IndexBuffer for AlignedIndexBuffer {
 
                 let needed_u64 = self.len.div_ceil(new_indices_per_u64);
 
+                self.index_size = new_size;
                 self.mask = (1 << new_size) - 1;
                 self.storage.truncate(needed_u64);
                 self.indices_per_u64 = new_indices_per_u64
@@ -212,7 +213,6 @@ impl IndexBuffer for AlignedIndexBuffer {
     fn set(&mut self, offset: usize, value: usize) -> usize {
         debug_assert!(self.index_size != 0);
         debug_assert!(offset < self.len);
-
         let indices_per_u64 = self.indices_per_u64 as usize;
         let target_u64 = unsafe { self.storage.get_unchecked_mut(offset / indices_per_u64) };
         let target_offset = (offset % indices_per_u64) * self.index_size;
@@ -227,15 +227,7 @@ impl IndexBuffer for AlignedIndexBuffer {
     }
 
     fn get(&self, offset: usize) -> Option<usize> {
-        if offset >= self.len {
-            return None;
-        }
-
-        if self.index_size == 0 {
-            return Some(0);
-        }
-
-        unsafe { Some(self.get_unchecked(offset)) }
+        (offset < self.len).then(|| unsafe { self.get_unchecked(offset) })
     }
 
     unsafe fn get_unchecked(&self, offset: usize) -> usize {

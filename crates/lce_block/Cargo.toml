@@ -1,5 +1,5 @@
 [package]
-name = "lce_biome"
+name = "lce_block"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

@@ -1,0 +1,83 @@
+[[block]]
+ident = "Ru4J:air"
+
+[[block]]
+ident = "Ru4J:grass"
+faces = {
+    top    = "textures/blocks/grass_top.png",
+    front  = "textures/blocks/grass_side.png",
+    left   = "textures/blocks/grass_side.png",
+    right  = "textures/blocks/grass_side.png",
+    back   = "textures/blocks/grass_side.png",
+    bottom = "textures/blocks/dirt.png",
+}
+
+[[block]]
+ident = "Ru4J:stone"
+faces = "textures/blocks/stone.png"
+
+[[block]]
+ident = "Ru4J:bedrock"
+faces = "textures/blocks/bedrock.png"
+
+[[block]]
+ident = "Ru4J:bookshelf"
+faces = {
+    top    = "textures/blocks/planks_oak.png",
+    front  = "textures/blocks/bookshelf.png",
+    left   = "textures/blocks/bookshelf.png",
+    right  = "textures/blocks/bookshelf.png",
+    back   = "textures/blocks/bookshelf.png",
+    bottom = "textures/blocks/planks_oak.png",
+}
+
+[[block]]
+ident = "Ru4J:brick"
+faces = "textures/blocks/brick.png"
+
+[[block]]
+ident = "Ru4J:clay"
+faces = "textures/blocks/clay.png"
+
+[[block]]
+ident = "Ru4J:coal_block"
+faces = "textures/blocks/coal_block.png"
+
+[[block]]
+ident = "Ru4J:coal_ore"
+faces = "textures/blocks/coal_ore.png"
+
+[[block]]
+ident = "Ru4J:cobblestone"
+faces = "textures/blocks/cobblestone.png"
+
+[[block]]
+ident = "Ru4J:mossy_cobblestone"
+faces = "textures/blocks/cobblestone_mossy.png"
+
+[[block]]
+ident = "Ru4J:command_block"
+faces = "textures/blocks/command_block.png"
+
+[[block]]
+ident = "Ru4J:crafting_table"
+faces = {
+    top    = "textures/blocks/crafting_table_top.png",
+    front  = "textures/blocks/crafting_table_front.png",
+    left   = "textures/blocks/crafting_table_side.png",
+    right  = "textures/blocks/crafting_table_side.png",
+    back   = "textures/blocks/crafting_table_side.png",
+    bottom = "textures/blocks/planks_oak.png",
+}
+
+[[block]]
+ident = "Ru4J:diamond_block"
+faces = "textures/blocks/diamond_block.png"
+
+[[block]]
+ident = "Ru4J:diamond_ore"
+faces = "textures/blocks/diamond_ore.png"
+
+[[block]]
+ident = "Ru4J:dirt"
+faces = "textures/blocks/dirt.png"

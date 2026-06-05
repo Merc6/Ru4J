@@ -15,10 +15,7 @@ pub use worldgen::Worldgen;
 #[rustfmt::skip]
 use {
     bevy::prelude::*,
-    leafwing_manifest::{
-        asset_state::SimpleAssetState,
-        plugin::{ManifestPlugin, RegisterManifest},
-    },
+    leafwing_manifest::plugin::RegisterManifest,
 };
 
 /// An Identifier that allows access into the [biome registry](BiomeRegistry).
@@ -30,8 +27,6 @@ pub struct LceBiomePlugin;
 
 impl Plugin for LceBiomePlugin {
     fn build(&self, app: &mut App) {
-        app.init_state::<SimpleAssetState>()
-            .add_plugins(ManifestPlugin::<SimpleAssetState>::default())
-            .register_manifest::<BiomeRegistry>("registry/biome.toml");
+        app.register_manifest::<BiomeRegistry>("registry/biome.toml");
     }
 }
